@@ -189,43 +189,8 @@ uint32_t index_alpha(const argon2_instance_t *instance,
      * blocks in this segment
      *      Other lanes : (SYNC_POINTS - 1) last segments
      */
-    /* uint32_t reference_area_size; */
     uint64_t relative_position;
     uint32_t start_position, absolute_position;
-
-    /*
-    if (0 == position->pass) {
-         First pass 
-        if (0 == position->slice) {
-             First slice 
-            reference_area_size =
-                position->index - 1;  all but the previous 
-        } else {
-            if (same_lane) {
-                 The same lane => add current segment 
-                reference_area_size =
-                    position->slice * instance->segment_length +
-                    position->index - 1;
-            } else {
-                reference_area_size =
-                    position->slice * instance->segment_length +
-                    ((position->index == 0) ? (-1) : 0);
-            }
-        }
-    } else {
-         Second pass 
-        if (same_lane) {
-            reference_area_size = instance->lane_length -
-                                  instance->segment_length + position->index -
-                                  1;
-        } else {
-            reference_area_size = instance->lane_length -
-                                  instance->segment_length +
-                                  ((position->index == 0) ? (-1) : 0);
-        }
-    }
-
-    */
 
     /* 1.2.4. Mapping pseudo_rand to 0..<reference_area_size-1> and produce
      * relative position 
