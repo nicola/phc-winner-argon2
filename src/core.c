@@ -191,10 +191,7 @@ uint32_t index_alpha(const argon2_instance_t *instance,
     uint64_t relative_position;
     uint32_t start_position, absolute_position;
 
-    /* 1.2.4. Mapping pseudo_rand to 0..<reference_area_size-1> and produce
-     * relative position 
-
-
+    /* 
     CHANGING TO BLOCKI-ALWEN DISTRIBUTION. COMPUTED IN REF.C
 
     relative_position = pseudo_rand;
