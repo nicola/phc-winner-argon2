@@ -25,6 +25,7 @@
 #endif
 #define VC_GE_2005(version) (version >= 1400)
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -188,19 +189,20 @@ uint32_t index_alpha(const argon2_instance_t *instance,
      * blocks in this segment
      *      Other lanes : (SYNC_POINTS - 1) last segments
      */
-    uint32_t reference_area_size;
+    /* uint32_t reference_area_size; */
     uint64_t relative_position;
     uint32_t start_position, absolute_position;
 
+    /*
     if (0 == position->pass) {
-        /* First pass */
+         First pass 
         if (0 == position->slice) {
-            /* First slice */
+             First slice 
             reference_area_size =
-                position->index - 1; /* all but the previous */
+                position->index - 1;  all but the previous 
         } else {
             if (same_lane) {
-                /* The same lane => add current segment */
+                 The same lane => add current segment 
                 reference_area_size =
                     position->slice * instance->segment_length +
                     position->index - 1;
@@ -211,7 +213,7 @@ uint32_t index_alpha(const argon2_instance_t *instance,
             }
         }
     } else {
-        /* Second pass */
+         Second pass 
         if (same_lane) {
             reference_area_size = instance->lane_length -
                                   instance->segment_length + position->index -
@@ -223,12 +225,22 @@ uint32_t index_alpha(const argon2_instance_t *instance,
         }
     }
 
+    */
+
     /* 1.2.4. Mapping pseudo_rand to 0..<reference_area_size-1> and produce
-     * relative position */
+     * relative position 
+
+
+    CHANGING TO BLOCKI-ALWEN DISTRIBUTION. COMPUTED IN REF.C
+
     relative_position = pseudo_rand;
     relative_position = relative_position * relative_position >> 32;
     relative_position = reference_area_size - 1 -
                         (reference_area_size * relative_position >> 32);
+
+    */
+
+    relative_position = pseudo_rand;
 
     /* 1.2.5 Computing starting position */
     start_position = 0;
@@ -495,6 +507,10 @@ int validate_inputs(const argon2_context *context) {
         return ARGON2_ALLOCATE_MEMORY_CBK_NULL;
     }
 
+    if (RAND_MAX != 2147483647) {
+        return ARGON2_RAND_RANGE_ERR;
+    }
+
     return ARGON2_OK;
 }
 
@@ -598,6 +614,10 @@ void initial_hash(uint8_t *blockhash, argon2_context *context,
 int initialize(argon2_instance_t *instance, argon2_context *context) {
     uint8_t blockhash[ARGON2_PREHASH_SEED_LENGTH];
     int result = ARGON2_OK;
+    uint32_t data_independent_addressing;
+    uint32_t rand_seed;
+
+
 
     if (instance == NULL || context == NULL)
         return ARGON2_INCORRECT_PARAMETER;
@@ -627,6 +647,23 @@ int initialize(argon2_instance_t *instance, argon2_context *context) {
     /* 3. Creating first blocks, we always have at least two blocks in a slice
      */
     fill_first_blocks(blockhash, instance);
+
+    /* Initialize random function for edge selection
+        PRNG initialization similar to previous, but done earlier in this case
+     */
+
+    data_independent_addressing =
+        (instance->type == Argon2_i) ||
+        (instance->type == Argon2_id);
+
+    if (data_independent_addressing) {
+        rand_seed  = instance->memory_blocks;
+        rand_seed ^= instance->passes;
+        rand_seed ^= instance->type;
+        srand(rand_seed);
+    }
+
+
     /* Clearing the hash */
     clear_internal_memory(blockhash, ARGON2_PREHASH_SEED_LENGTH);
 
